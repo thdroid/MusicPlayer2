@@ -11,12 +11,14 @@ import android.widget.ImageButton;
 import android.widget.SeekBar;
 import android.widget.TextView;
 
+import java.io.IOException;
+
 public class MainActivity extends AppCompatActivity implements View.OnClickListener, SeekBar.OnSeekBarChangeListener {
-    private MediaPlayer mediaPlayer;
-    private String mpath;
+    private MediaPlayer mediaPlayer= new MediaPlayer();
     private ImageButton play_button;
     private SeekBar seekBar;
-    private TextView text_now, text_end, text_music;
+    private TextView text_now, text_end;
+    private int count=0;
     private Button intent_track;
     private int musicTimes = 0;
     private Handler handler = new Handler();
@@ -41,7 +43,30 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_play);
-        initView();
+        Intent intent=getIntent();
+        String mpath=intent.getStringExtra("Data");
+        initView(mpath);
+    }
+
+    public void release(){
+        mediaPlayer.stop();
+        mediaPlayer.reset();
+        mediaPlayer.release();
+    }
+
+
+    private void initView(String path) {
+        try {
+            mediaPlayer.setDataSource(path);
+            mediaPlayer.prepare();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        play_button = (ImageButton) findViewById(R.id.play_Button);
+        seekBar = (SeekBar) findViewById(R.id.seekBar);
+        text_end = (TextView) findViewById(R.id.text_End);
+        text_now = (TextView) findViewById(R.id.text_Now);
+        intent_track = (Button) findViewById(R.id.intent_track);
         musicTimes = mediaPlayer.getDuration();
         play_button.setOnClickListener(this);
         intent_track.setOnClickListener(this);
@@ -50,15 +75,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         seekBar.setProgress(0);
         seekBar.setMax(musicTimes);
         seekBar.setOnSeekBarChangeListener(this);
-    }
-
-    private void initView() {
-        mediaPlayer = MediaPlayer.create(this, R.raw.uchunohajimari);
-        play_button = (ImageButton) findViewById(R.id.play_Button);
-        seekBar = (SeekBar) findViewById(R.id.seekBar);
-        text_end = (TextView) findViewById(R.id.text_End);
-        text_now = (TextView) findViewById(R.id.text_Now);
-        intent_track = (Button) findViewById(R.id.intent_track);
     }
 
     @Override
